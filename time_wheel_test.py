@@ -9,24 +9,31 @@ def new_session():
     session += 1
     return session
 
-def new_delta():
-    return random.randint(1, 60*60*24 + 60*60*10)
+def new_delta(upper):
+    return random.randint(1, upper)
 
 tw = time_wheel.NewPod([60, 60, 24])
 
 records = {}
-def new_record(tw):
+def new_record(tw, delta_upper):
     global records
     sess = new_session()
-    delta = new_delta()
+    delta = new_delta(delta_upper)
     records[sess] = [tw.tick, delta]
     print(f"push, sess:{sess}, delta:{delta}, at tick:{tw.tick}")
     tw.Push(sess, delta)
 
-total_size = 20
-cur_size = 10
+total_size = 35
+cur_size = 20
 for i in range(cur_size):
-    new_record(tw)
+    if i < 5:
+        new_record(tw, 60)
+    elif i < 10:
+        new_record(tw, 60*60)
+    elif i < 15:
+        new_record(tw, 60*60*24)
+    else:
+        new_record(tw, 60*60*24*2)
 
 print("------time wheel tick begin-----")
 while records:
@@ -39,6 +46,6 @@ while records:
 
     if out and cur_size <= total_size and random.randint(1, 100) <= 78:
         cur_size += 1
-        new_record(tw)
+        new_record(tw, 60*60*24*2)
 
 print("------time wheel tick end-----")
