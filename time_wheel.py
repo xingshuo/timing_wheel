@@ -60,3 +60,35 @@ class TimeWheelPod:
                 for node in move_list:
                     self._push_node(node)
             else:
+                move_list = self.wheels[i+1].Tick()
+                for node in move_list:
+                    self._push_node(node)
+
+    # Returns:
+    #  +1 wheel idx [0, wheel_size) if in wheel range, -1(represent far list) otherwise
+    def Push(self, session, delta):
+        assert delta > 0, "delta Non-positive"
+        expire = self.tick + delta
+        node = TimeWheelPod.Node(session, expire)
+        return self._push_node(node)
+
+    # tick once
+    def Tick(self):
+        self.tick += 1
+        out = self._execute()
+        self._shift()
+        return out
+    
+    # tick elapse times
+    def Update(self, elapse):
+        out = []
+        for i in range(elapse):
+            self.tick += 1
+            out.extend(self._execute())
+            self._shift()
+        return out
+
+# Arguments:
+#  +1 wheel size list
+def NewPod(size_list):
+    return TimeWheelPod(size_list)
